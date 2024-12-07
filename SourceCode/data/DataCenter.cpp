@@ -2,6 +2,7 @@
 #include <cstring>
 #include "../Level.h"
 #include "../Player.h"
+#include "../animal/animal.h"
 #include "../hero.h"
 #include "../monsters/Monster.h"
 #include "../towers/Bullet.h"
@@ -32,6 +33,11 @@ DataCenter::DataCenter() {
 DataCenter::~DataCenter() {
     delete player;
     delete level;
+    delete hero;
+    for (animal*& a : animals) {
+        delete a;
+    }
+
     for (Monster*& m : monsters) {
         delete m;
     }

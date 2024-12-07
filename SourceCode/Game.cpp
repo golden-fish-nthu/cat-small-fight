@@ -9,6 +9,7 @@
 #include "Level.h"
 #include "Player.h"
 #include "Utils.h"
+#include "animal/animal.h"
 #include "data/DataCenter.h"
 #include "data/FontCenter.h"
 #include "data/ImageCenter.h"
@@ -215,6 +216,7 @@ bool Game::game_update() {
         DC->player->update();
         SC->update();
         ui->update();
+        DC->hero->update();
         if (state != STATE::START) {
             DC->level->update();
             OC->update();

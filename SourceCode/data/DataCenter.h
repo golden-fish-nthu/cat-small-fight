@@ -13,6 +13,7 @@ class Monster;
 class Tower;
 class Bullet;
 
+class animal;
 class Hero;
 /**
  * @brief Stores generic global data and relatively small data structures.
@@ -95,6 +96,7 @@ class DataCenter {
      */
     std::vector<Bullet*> towerBullets;
 
+    std::vector<animal*> animals;
     Hero* hero;
 
    private:
