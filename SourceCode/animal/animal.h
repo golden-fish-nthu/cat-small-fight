@@ -12,10 +12,10 @@ enum class Dir;
 // 固定设置
 enum class AnimalType {
     dog,
-    pig,
-    lepord,
-    man,
-    spider,
+    // pig,
+    // lepord,
+    // man,
+    // spider,
     AnimalTYPE_MAX
 };
 

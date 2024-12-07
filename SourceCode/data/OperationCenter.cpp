@@ -5,17 +5,16 @@
 #include "../towers/Bullet.h"
 #include "../towers/Tower.h"
 #include "DataCenter.h"
-
 void OperationCenter::update() {
-    // Update monsters.
+    // 更新怪物。
     _update_monster();
-    // Update towers.
+    // 更新塔。
     _update_tower();
-    // Update tower bullets.
+    // 更新塔的子彈。
     _update_towerBullet();
-    // If any bullet overlaps with any monster, we delete the bullet, reduce the HP of the monster, and delete the monster if necessary.
+    // 如果任何子彈與任何怪物重疊，我們刪除子彈，減少怪物的HP，並在必要時刪除怪物。
     _update_monster_towerBullet();
-    // If any monster reaches the end, hurt the player and delete the monster.
+    // 如果任何怪物到達終點，傷害玩家並刪除怪物。
     _update_monster_player();
     _update_monster_hero();
 }
@@ -36,7 +35,7 @@ void OperationCenter::_update_towerBullet() {
     std::vector<Bullet*>& towerBullets = DataCenter::get_instance()->towerBullets;
     for (Bullet* towerBullet : towerBullets)
         towerBullet->update();
-    // Detect if a bullet flies too far (exceeds its fly distance limit), which means the bullet lifecycle has ended.
+    // 檢測子彈是否飛得太遠（超過其飛行距離限制），這意味著子彈的生命周期已結束。
     for (size_t i = 0; i < towerBullets.size(); ++i) {
         if (towerBullets[i]->get_fly_dist() <= 0) {
             towerBullets.erase(towerBullets.begin() + i);
@@ -51,9 +50,9 @@ void OperationCenter::_update_monster_towerBullet() {
     std::vector<Bullet*>& towerBullets = DC->towerBullets;
     for (size_t i = 0; i < monsters.size(); ++i) {
         for (size_t j = 0; j < towerBullets.size(); ++j) {
-            // Check if the bullet overlaps with the monster.
+            // 檢查子彈是否與怪物重疊。
             if (monsters[i]->shape->overlap(*(towerBullets[j]->shape))) {
-                // Reduce the HP of the monster. Delete the bullet.
+                // 減少怪物的HP。刪除子彈。
                 monsters[i]->HP -= towerBullets[j]->get_dmg();
                 towerBullets.erase(towerBullets.begin() + j);
                 --j;
@@ -67,16 +66,16 @@ void OperationCenter::_update_monster_player() {
     std::vector<Monster*>& monsters = DC->monsters;
     Player*& player = DC->player;
     for (size_t i = 0; i < monsters.size(); ++i) {
-        // Check if the monster is killed.
+        // 檢查怪物是否被殺死。
         if (monsters[i]->HP <= 0) {
-            // Monster gets killed. Player receives money.
+            // 怪物被殺死。玩家獲得金錢。
             player->coin += monsters[i]->get_money();
             monsters.erase(monsters.begin() + i);
             --i;
-            // Since the current monsster is killed, we can directly proceed to next monster.
+            // 由於當前怪物被殺死，我們可以直接進入下一個怪物。
             break;
         }
-        // Check if the monster reaches the end.
+        // 檢查怪物是否到達終點。
         if (monsters[i]->get_path().empty()) {
             monsters.erase(monsters.begin() + i);
             player->HP--;
