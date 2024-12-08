@@ -74,7 +74,6 @@ Dir convert_dir(const Point& v) {
 
 Monster::Monster(const vector<Point>& path, MonsterType type) {
     DataCenter* DC = DataCenter::get_instance();
-
     shape.reset(new Rectangle{0, 0, 0, 0});
     this->type = type;
     dir = Dir::RIGHT;

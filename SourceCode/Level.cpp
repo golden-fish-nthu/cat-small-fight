@@ -1,19 +1,19 @@
 #include "Level.h"
 #include <allegro5/allegro_primitives.h>
 #include <array>
+#include <iostream>
 #include <string>
 #include "Utils.h"
 #include "data/DataCenter.h"
 #include "monsters/Monster.h"
 #include "shapes/Point.h"
 #include "shapes/Rectangle.h"
-
 using namespace std;
 
-// fixed settings
+// 固定設定
 namespace LevelSetting {
 constexpr char level_path_format[] = "./assets/level/LEVEL%d.txt";
-//! @brief Grid size for each level.
+//! @brief 每個關卡的網格大小
 constexpr array<int, 4> grid_size = {
     40, 40, 40, 40};
 constexpr int monster_spawn_rate = 90;
@@ -27,12 +27,12 @@ void Level::init() {
 }
 
 /**
- * @brief Loads level data from input file. The input file is required to follow the format.
- * @param lvl level index. The path format is a fixed setting in code.
- * @details The content of the input file should be formatted as follows:
- *          * Total number of monsters.
- *          * Number of each different number of monsters. The order and number follows the definition of MonsterType.
- *          * Indefinite number of Point (x, y), represented in grid format.
+ * @brief 從輸入文件加載關卡數據。輸入文件需要遵循特定格式。
+ * @param lvl 關卡索引。路徑格式是代碼中的固定設置。
+ * @details 輸入文件的內容應按以下格式排列：
+ *          * 怪物總數。
+ *          * 每種不同怪物的數量。順序和數量遵循 MonsterType 的定義。
+ *          * 不定數量的點座標 (x, y)，以網格格式表示。
  * @see level_path_format
  * @see MonsterType
  */
@@ -46,28 +46,29 @@ void Level::load_level(int lvl) {
     level = lvl;
     grid_w = DC->game_field_length / LevelSetting::grid_size[lvl];
     grid_h = DC->game_field_length / LevelSetting::grid_size[lvl];
+    cout << grid_w << " " << grid_h << endl;
     num_of_monsters.clear();
     road_path.clear();
 
     int num;
-    // read total number of monsters & number of each monsters
+    // 讀取怪物總數和每種怪物的數量
     fscanf(f, "%d", &num);
     for (size_t i = 0; i < static_cast<size_t>(MonsterType::MONSTERTYPE_MAX); ++i) {
         fscanf(f, "%d", &num);
         num_of_monsters.emplace_back(num);
     }
 
-    // read road path
-    while (fscanf(f, "%d", &num) != EOF) {
-        int w = num % grid_w;
-        int h = num / grid_h;
-        road_path.emplace_back(w, h);
+    // 忽略文件中的道路路徑，手動生成直線道路
+    for (int i = 0; i < grid_h; ++i) {
+        road_path.emplace_back(i, 10);  // x 固定為 0，y 從 0 遞增
     }
+
+    fclose(f);
     debug_log("<Level> load level %d.\n", lvl);
 }
 
 /**
- * @brief Updates monster_spawn_counter and create monster if needed.
+ * @brief 更新怪物生成計數器並在需要時創建怪物。
  */
 void Level::update() {
     if (monster_spawn_counter) {
@@ -89,7 +90,7 @@ void Level::update() {
 void Level::draw() {
     if (level == -1)
         return;
-    for (auto& [i, j] : road_path) {
+    for (const auto& [i, j] : road_path) {
         int x1 = i * LevelSetting::grid_size[level];
         int y1 = j * LevelSetting::grid_size[level];
         int x2 = x1 + LevelSetting::grid_size[level];
@@ -99,22 +100,22 @@ void Level::draw() {
 }
 
 bool Level::is_onroad(const Rectangle& region) {
-    for (const Point& grid : road_path) {
-        if (grid_to_region(grid).overlap(region))
+    for (const auto& [i, j] : road_path) {
+        int x1 = i * LevelSetting::grid_size[level];
+        int y1 = j * LevelSetting::grid_size[level];
+        int x2 = x1 + LevelSetting::grid_size[level];
+        int y2 = y1 + LevelSetting::grid_size[level];
+        Rectangle road_rect(x1, y1, x2, y2);
+        if (road_rect.overlaps(region)) {
             return true;
+        }
     }
     return false;
 }
-
-Rectangle
-Level::grid_to_region(const Point& grid) const {
+Rectangle Level::grid_to_region(const Point& grid) const {
     int x1 = grid.x * LevelSetting::grid_size[level];
     int y1 = grid.y * LevelSetting::grid_size[level];
     int x2 = x1 + LevelSetting::grid_size[level];
     int y2 = y1 + LevelSetting::grid_size[level];
-    return Rectangle{x1, y1, x2, y2};
-}
-
-int Level::get_level_width() const {
-    return grid_w * LevelSetting::grid_size[level];
+    return Rectangle(x1, y1, x2, y2);
 }

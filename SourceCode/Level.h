@@ -30,29 +30,11 @@ class Level {
     }
 
    private:
-    /**
-     * @brief Stores the monster's attack route, whose Point is represented in grid format.
-     */
     std::vector<Point> road_path;
-    /**
-     * @brief The index of current level.
-     */
     int level;
-    /**
-     * @brief Number of grid in x-direction.
-     */
     int grid_w;
-    /**
-     * @brief Number of grid in y-direction.
-     */
     int grid_h;
-    /**
-     * @brief Time remaining for the next monster to spawn.
-     */
     int monster_spawn_counter;
-    /**
-     * @brief Number of each different type of monsters.
-     */
     std::vector<int> num_of_monsters;
 };
 
