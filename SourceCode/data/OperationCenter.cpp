@@ -1,4 +1,5 @@
 #include "OperationCenter.h"
+#include <algorithm>
 #include "../Player.h"
 #include "../hero.h"
 #include "../monsters/Monster.h"
@@ -16,7 +17,9 @@ void OperationCenter::update() {
     _update_monster_towerBullet();
     // 如果任何怪物到達終點，傷害玩家並刪除怪物。
     _update_monster_player();
-    _update_monster_hero();
+    //_update_monster_hero();
+
+    _update_monster_collision();
 }
 
 void OperationCenter::_update_monster() {
@@ -84,15 +87,15 @@ void OperationCenter::_update_monster_player() {
     }
 }
 
-void OperationCenter::_update_monster_hero() {
-    DataCenter* DC = DataCenter ::get_instance();
+// void OperationCenter::_update_monster_hero() {
+//     DataCenter* DC = DataCenter ::get_instance();
 
-    std::vector<Monster*>& monsters = DC->monsters;
-    for (size_t i = 0; i < monsters.size(); ++i) {
-        if (monsters[i]->shape->overlap(*(DC->hero->shape)))
-            monsters[i]->HP = 0;
-    }
-}
+//     std::vector<Monster*>& monsters = DC->monsters;
+//     for (size_t i = 0; i < monsters.size(); ++i) {
+//         if (monsters[i]->shape->overlap(*(DC->hero->shape)))
+//             monsters[i]->HP = 0;
+//     }
+// }
 
 void OperationCenter::draw() {
     _draw_monster();
@@ -116,4 +119,22 @@ void OperationCenter::_draw_towerBullet() {
     std::vector<Bullet*>& towerBullets = DataCenter::get_instance()->towerBullets;
     for (Bullet* towerBullet : towerBullets)
         towerBullet->draw();
+}
+
+void OperationCenter::_update_monster_collision() {
+    std::vector<Monster*>& monsters = DataCenter::get_instance()->monsters;
+    for (size_t i = 0; i < monsters.size(); ++i) {
+        for (size_t j = i + 1; j < monsters.size(); ++j) {
+            if (monsters[i]->shape->overlap(*(monsters[j]->shape))) {
+                // 標記碰撞的怪物為死亡
+                monsters[i]->is_dead = true;
+                monsters[j]->is_dead = true;
+            }
+        }
+    }
+
+    // 移除死亡的怪物
+    monsters.erase(std::remove_if(monsters.begin(), monsters.end(),
+                                  [](Monster* monster) { return monster->is_dead; }),
+                   monsters.end());
 }

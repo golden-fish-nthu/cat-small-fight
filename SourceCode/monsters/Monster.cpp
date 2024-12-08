@@ -92,6 +92,8 @@ Monster::Monster(const vector<Point>& path, MonsterType type) {
 }
 
 void Monster::update() {
+    if (is_dead)
+        return;
     DataCenter* DC = DataCenter::get_instance();
     ImageCenter* IC = ImageCenter::get_instance();
 
@@ -128,6 +130,8 @@ void Monster::update() {
 }
 
 void Monster::draw() {
+    if (is_dead)
+        return;
     ImageCenter* IC = ImageCenter::get_instance();
     char buffer[50];
     sprintf(

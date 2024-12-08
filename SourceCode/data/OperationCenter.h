@@ -32,6 +32,7 @@ class OperationCenter {
     void _update_monster_towerBullet();
     void _update_monster_player();
     void _update_monster_hero();
+    void _update_monster_collision();  // Added declaration
 
    private:
     void _draw_monster();

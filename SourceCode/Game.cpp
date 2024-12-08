@@ -140,7 +140,7 @@ void Game::game_init() {
 
     DC->level->init();
 
-    DC->hero->init();
+    // DC->hero->init();
 
     // game start
     background = IC->get(background_img_path);
@@ -256,7 +256,7 @@ void Game::game_draw() {
             DC->level->draw();
             ui->draw();
             OC->draw();
-            DC->hero->draw();
+            // DC->hero->draw();
         }
     }
     switch (state) {

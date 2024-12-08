@@ -32,6 +32,7 @@ class Monster : public Object {
     void draw();
     const int& get_money() const { return money; }
     int HP;
+    bool is_dead = false;
     const std::queue<Point>& get_path() const { return path; }
 
    protected:
@@ -80,4 +81,4 @@ class Monster : public Object {
     std::queue<Point> path;
 };
 
-#endif
+#endif  // MONSTER_H_INCLUDED
