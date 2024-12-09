@@ -60,7 +60,7 @@ void Level::load_level(int lvl) {
 
     // 忽略文件中的道路路徑，手動生成直線道路
     for (int i = 0; i < grid_h; ++i) {
-        road_path.emplace_back(i, 10);  // x 固定為 0，y 從 0 遞增
+        road_path.emplace_back(i, 8);  // x 固定為 0，y 從 0 遞增
     }
 
     fclose(f);

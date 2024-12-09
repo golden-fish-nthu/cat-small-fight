@@ -97,7 +97,7 @@ class DataCenter {
     std::vector<Bullet*> towerBullets;
 
     // std::vector<animal*> animals;
-    // Hero* hero;
+    Hero* hero;
 
    private:
     DataCenter();

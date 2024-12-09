@@ -136,7 +136,7 @@ void Game::game_init() {
     ui = new UI();
     ui->init();
     DC->level->init();
-    // DC->hero->init();
+    DC->hero->init();
     // game start
     background = IC->get(background_img_path);
     debug_log("Game state: change to START\n");
@@ -211,7 +211,7 @@ bool Game::game_update() {
         DC->player->update();
         SC->update();
         ui->update();
-        // DC->hero->update();
+        //DC->hero->update();
         if (state != STATE::START) {
             DC->level->update();
             OC->update();
@@ -251,7 +251,7 @@ void Game::game_draw() {
             DC->level->draw();
             ui->draw();
             OC->draw();
-            // DC->hero->draw();
+            DC->hero->draw();
         }
     }
     switch (state) {

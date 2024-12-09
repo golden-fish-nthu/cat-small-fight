@@ -76,7 +76,7 @@ Monster::Monster(const vector<Point>& path, MonsterType type) {
     DataCenter* DC = DataCenter::get_instance();
     shape.reset(new Rectangle{0, 0, 0, 0});
     this->type = type;
-    dir = Dir::RIGHT;
+    dir = Dir::LEFT;
     bitmap_img_id = 0;
     bitmap_switch_counter = 0;
     for (const Point& p : path)
@@ -85,7 +85,11 @@ Monster::Monster(const vector<Point>& path, MonsterType type) {
         const Point& grid = this->path.front();
         const Rectangle& region = DC->level->grid_to_region(grid);
         // 暫時將邊界框設置為中心（無區域），因為我們還沒有獲取怪物的碰撞箱。
-        shape.reset(new Rectangle{region.center_x(), region.center_y(), region.center_x(), region.center_y()});
+        //shape.reset(new Rectangle{region.center_x(), region.center_y(), region.center_x(), region.center_y()});
+        shape.reset(new Rectangle(DC->window_width - 50,
+                              DC->window_height / 2,
+                              DC->window_width,
+                              DC->window_height / 2 + 50));
         this->path.pop();
     }
 }
@@ -105,11 +109,11 @@ void Monster::update() {
     }
 
     // Set direction to always right
-    dir = Dir::RIGHT;
+    dir = Dir::LEFT;
 
     // Move right with the same speed
     double movement = v / DC->FPS;
-    shape->update_center_x(shape->center_x() + movement);
+    shape->update_center_x(shape->center_x() - movement);
 
     // Update collision box
     char buffer[50];
