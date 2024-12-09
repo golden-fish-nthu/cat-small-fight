@@ -131,17 +131,12 @@ void Game::game_init() {
 
     // init sound setting
     SC->init();
-
     // init font setting
     FC->init();
-
     ui = new UI();
     ui->init();
-
     DC->level->init();
-
     // DC->hero->init();
-
     // game start
     background = IC->get(background_img_path);
     debug_log("Game state: change to START\n");
