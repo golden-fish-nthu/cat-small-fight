@@ -19,7 +19,7 @@ class Hero : public Object {
    public:
     void draw();
     void init();
-    //void update();
+    void update();
 
    private:
     Hstate state = Hstate::front;

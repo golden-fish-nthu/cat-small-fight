@@ -11,21 +11,16 @@
 #include "shapes/Point.h"
 #include "shapes/Rectangle.h"
 #include "towers/Tower.h"
-
-// fixed settings
-constexpr char love_img_path[] = "./assets/image/love.png";
-constexpr int love_img_padding = 5;
-constexpr int tower_img_left_padding = 30;
-constexpr int tower_img_top_padding = 30;
+constexpr int tower_img_left_padding = 30;  // 塔圖片左邊距
+constexpr int tower_img_top_padding = 30;   // 塔圖片上邊距
 
 void UI::init() {
     DataCenter* DC = DataCenter::get_instance();
     ImageCenter* IC = ImageCenter::get_instance();
-    love = IC->get(love_img_path);
     int tl_x = DC->game_field_length + tower_img_left_padding;
     int tl_y = tower_img_top_padding;
     int max_height = 0;
-    // arrange tower shop
+    // 安排塔商店
     for (size_t i = 0; i < (size_t)(TowerType::TOWERTYPE_MAX); ++i) {
         ALLEGRO_BITMAP* bitmap = IC->get(TowerSetting::tower_menu_img_path[i]);
         int w = al_get_bitmap_width(bitmap);
@@ -50,11 +45,12 @@ void UI::update() {
 
     switch (state) {
         case STATE::HALT: {
+            // 檢查是否懸停在商店塔項目上
             for (size_t i = 0; i < tower_items.size(); ++i) {
                 auto& [bitmap, p, price] = tower_items[i];
                 int w = al_get_bitmap_width(bitmap);
                 int h = al_get_bitmap_height(bitmap);
-                // hover on a shop tower item
+                // 懸停在商店塔項目上
                 if (mouse.overlap(Rectangle{p.x, p.y, p.x + w, p.y + h})) {
                     on_item = i;
                     debug_log("<UI> state: change to HOVER\n");
@@ -74,9 +70,9 @@ void UI::update() {
                 state = STATE::HALT;
                 break;
             }
-            // click mouse left button
+            // 點擊滑鼠左鍵
             if (DC->mouse_state[1] && !DC->prev_mouse_state[1]) {
-                // no money
+                // 沒有足夠的金錢
                 if (price > DC->player->coin) {
                     debug_log("<UI> Not enough money to buy tower %d.\n", on_item);
                     break;
@@ -87,12 +83,12 @@ void UI::update() {
             break;
         }
         case STATE::SELECT: {
-            // click mouse left button: place
+            // 點擊滑鼠左鍵：放置
             if (DC->mouse_state[1] && !DC->prev_mouse_state[1]) {
                 debug_log("<UI> state: change to PLACE\n");
                 state = STATE::PLACE;
             }
-            // click mouse right button: cancel
+            // 點擊滑鼠右鍵：取消
             if (DC->mouse_state[2] && !DC->prev_mouse_state[2]) {
                 on_item = -1;
                 debug_log("<UI> state: change to HALT\n");
@@ -101,15 +97,15 @@ void UI::update() {
             break;
         }
         case STATE::PLACE: {
-            // check placement legality
+            // 檢查放置合法性
             ALLEGRO_BITMAP* bitmap = Tower::get_bitmap(static_cast<TowerType>(on_item));
             int w = al_get_bitmap_width(bitmap);
             int h = al_get_bitmap_height(bitmap);
             Rectangle place_region{mouse.x - w / 2, mouse.y - h / 2, DC->mouse.x + w / 2, DC->mouse.y + h / 2};
             bool place = true;
-            // tower cannot be placed on the road
+            // 塔不能放置在道路上
             place &= (!DC->level->is_onroad(place_region));
-            // tower cannot intersect with other towers
+            // 塔不能與其他塔重疊
             for (Tower* tower : DC->towers) {
                 place &= (!place_region.overlap(tower->get_region()));
             }
@@ -130,20 +126,13 @@ void UI::draw() {
     DataCenter* DC = DataCenter::get_instance();
     FontCenter* FC = FontCenter::get_instance();
     const Point& mouse = DC->mouse;
-    // draw HP
+    // 繪製 HP
     const int& game_field_length = DC->game_field_length;
     const int& player_HP = DC->player->HP;
-    int love_width = al_get_bitmap_width(love);
-    for (int i = 1; i <= player_HP; ++i) {
-        al_draw_bitmap(love, game_field_length - (love_width + love_img_padding) * i, love_img_padding, 0);
-    }
-    // draw coin
+
+    // 繪製金幣
     const int& player_coin = DC->player->coin;
-    al_draw_textf(
-        FC->courier_new[FontSize::MEDIUM], al_map_rgb(0, 0, 0),
-        game_field_length + love_img_padding, love_img_padding,
-        ALLEGRO_ALIGN_LEFT, "coin: %5d", player_coin);
-    // draw tower shop items
+    // 繪製塔商店項目
     for (auto& [bitmap, p, price] : tower_items) {
         int w = al_get_bitmap_width(bitmap);
         int h = al_get_bitmap_height(bitmap);
@@ -161,7 +150,7 @@ void UI::draw() {
     switch (state) {
         static Tower* selected_tower = nullptr;
         case STATE::HALT: {
-            // No tower should be selected for HALT state.
+            // HALT 狀態下不應選擇任何塔。
             if (selected_tower != nullptr) {
                 delete selected_tower;
                 selected_tower = nullptr;
@@ -172,12 +161,12 @@ void UI::draw() {
             auto& [bitmap, p, price] = tower_items[on_item];
             int w = al_get_bitmap_width(bitmap);
             int h = al_get_bitmap_height(bitmap);
-            // Create a semitransparent mask covered on the hovered tower.
+            // 創建一個半透明的遮罩覆蓋在懸停的塔上。
             al_draw_filled_rectangle(p.x, p.y, p.x + w, p.y + h, al_map_rgba(50, 50, 50, 64));
             break;
         }
         case STATE::SELECT: {
-            // If a tower is selected, we new a corresponding tower for previewing purpose.
+            // 如果選擇了一個塔，我們需要新建一個對應的塔來預覽。
             if (selected_tower == nullptr) {
                 selected_tower = Tower::create_tower(static_cast<TowerType>(on_item), mouse);
             } else {
@@ -186,7 +175,7 @@ void UI::draw() {
             }
         }
         case STATE::PLACE: {
-            // If we select a tower from menu, we need to preview where the tower will be built and its attack range.
+            // 如果我們從菜單中選擇了一個塔，我們需要預覽塔將被建造的位置及其攻擊範圍。
             ALLEGRO_BITMAP* bitmap = Tower::get_bitmap(static_cast<TowerType>(on_item));
             al_draw_filled_circle(mouse.x, mouse.y, selected_tower->attack_range(), al_map_rgba(255, 0, 0, 32));
             int w = al_get_bitmap_width(bitmap);

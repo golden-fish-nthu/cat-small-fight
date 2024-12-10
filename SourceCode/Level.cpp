@@ -45,7 +45,7 @@ void Level::load_level(int lvl) {
     GAME_ASSERT(f != nullptr, "cannot find level.");
     level = lvl;
     grid_w = DC->game_field_length / LevelSetting::grid_size[lvl];
-    grid_h = DC->game_field_length / LevelSetting::grid_size[lvl];
+    grid_h = DC->window_height / LevelSetting::grid_size[lvl];
     cout << grid_w << " " << grid_h << endl;
     num_of_monsters.clear();
     road_path.clear();
@@ -59,7 +59,7 @@ void Level::load_level(int lvl) {
     }
 
     // 忽略文件中的道路路徑，手動生成直線道路
-    for (int i = 0; i < grid_h; ++i) {
+    for (int i = 0; i < grid_w; ++i) {
         road_path.emplace_back(i, 8);  // x 固定為 0，y 從 0 遞增
     }
 
@@ -70,22 +70,22 @@ void Level::load_level(int lvl) {
 /**
  * @brief 更新怪物生成計數器並在需要時創建怪物。
  */
-void Level::update() {
-    if (monster_spawn_counter) {
-        monster_spawn_counter--;
-        return;
-    }
-    DataCenter* DC = DataCenter::get_instance();
+// void Level::update() {
+//     if (monster_spawn_counter) {
+//         monster_spawn_counter--;
+//         return;
+//     }
+//     DataCenter* DC = DataCenter::get_instance();
 
-    for (size_t i = 0; i < num_of_monsters.size(); ++i) {
-        if (num_of_monsters[i] == 0)
-            continue;
-        DC->monsters.emplace_back(Monster::create_monster(static_cast<MonsterType>(i), DC->level->get_road_path()));
-        num_of_monsters[i]--;
-        break;
-    }
-    monster_spawn_counter = LevelSetting::monster_spawn_rate;
-}
+//     for (size_t i = 0; i < num_of_monsters.size(); ++i) {
+//         if (num_of_monsters[i] == 0)
+//             continue;
+//         DC->monsters.emplace_back(Monster::create_monster(static_cast<MonsterType>(i), DC->level->get_road_path()));
+//         num_of_monsters[i]--;
+//         break;
+//     }
+//     monster_spawn_counter = LevelSetting::monster_spawn_rate;
+// }
 
 void Level::draw() {
     if (level == -1)

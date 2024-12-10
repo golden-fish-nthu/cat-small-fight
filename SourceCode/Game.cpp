@@ -16,24 +16,24 @@
 #include "data/OperationCenter.h"
 #include "data/SoundCenter.h"
 #include "hero.h"
-
-// fixed settings
+#include "monsters/Monster.h"
+// 固定设置
 constexpr char game_icon_img_path[] = "./assets/image/game_icon.png";
 constexpr char game_start_sound_path[] = "./assets/sound/growl.wav";
 constexpr char background_img_path[] = "./assets/image/StartBackground.jpg";
 constexpr char background_sound_path[] = "./assets/sound/BackgroundMusic.ogg";
 
 /**
- * @brief Game entry.
- * @details The function processes all allegro events and update the event state to a generic data storage (i.e. DataCenter).
- * For timer event, the game_update and game_draw function will be called if and only if the current is timer.
+ * @brief 游戏入口。
+ * @details 该函数处理所有 Allegro 事件，并将事件状态更新到通用数据存储（即 DataCenter）。
+ * 对于计时器事件，只有当当前是计时器时才会调用 game_update 和 game_draw 函数。
  */
 void Game::execute() {
     DataCenter* DC = DataCenter::get_instance();
-    // main game loop
+    // 主游戏循环
     bool run = true;
     while (run) {
-        // process all events here
+        // 在此处理所有事件
         al_wait_for_event(event_queue, &event);
         switch (event.type) {
             case ALLEGRO_EVENT_TIMER: {
@@ -41,12 +41,26 @@ void Game::execute() {
                 game_draw();
                 break;
             }
-            case ALLEGRO_EVENT_DISPLAY_CLOSE: {  // stop game
+            case ALLEGRO_EVENT_DISPLAY_CLOSE: {  // 停止游戏
                 run = false;
                 break;
             }
             case ALLEGRO_EVENT_KEY_DOWN: {
                 DC->key_state[event.keyboard.keycode] = true;
+                // 處理數字鍵
+                if (event.keyboard.keycode >= ALLEGRO_KEY_1 && event.keyboard.keycode <= ALLEGRO_KEY_4) {
+                    int monster_type = event.keyboard.keycode - ALLEGRO_KEY_1;
+                    int monster_cost = 100;  // 假設每個怪物的成本是 100 金幣
+                    if (DC->player->coin >= monster_cost) {
+                        DC->player->coin -= monster_cost;
+                        DC->monsters.emplace_back(Monster::create_monster(static_cast<MonsterType>(monster_type), DC->level->get_road_path()));
+                        debug_log("Generated monster type %d\n", monster_type);
+                        debug_log("Player's coin: %d\n", DC->player->coin);
+                    } else {
+                        debug_log("Player's coin: %d\n", DC->player->coin);
+                        debug_log("Not enough money to generate monster type %d\n", monster_type);
+                    }
+                }
                 break;
             }
             case ALLEGRO_EVENT_KEY_UP: {
@@ -73,14 +87,14 @@ void Game::execute() {
 }
 
 /**
- * @brief Initialize all allegro addons and the game body.
- * @details Only one timer is created since a game and all its data should be processed synchronously.
+ * @brief 初始化所有 Allegro 插件和游戏主体。
+ * @details 只创建一个计时器，因为游戏及其所有数据都应该同步处理。
  */
 Game::Game() {
     DataCenter* DC = DataCenter::get_instance();
     GAME_ASSERT(al_init(), "failed to initialize allegro.");
 
-    // initialize allegro addons
+    // 初始化 Allegro 插件
     bool addon_init = true;
     addon_init &= al_init_primitives_addon();
     addon_init &= al_init_font_addon();
@@ -89,14 +103,14 @@ Game::Game() {
     addon_init &= al_init_acodec_addon();
     GAME_ASSERT(addon_init, "failed to initialize allegro addons.");
 
-    // initialize events
+    // 初始化事件
     bool event_init = true;
     event_init &= al_install_keyboard();
     event_init &= al_install_mouse();
     event_init &= al_install_audio();
     GAME_ASSERT(event_init, "failed to initialize allegro events.");
 
-    // initialize game body
+    // 初始化游戏主体
     GAME_ASSERT(
         display = al_create_display(DC->window_width, DC->window_height),
         "failed to create display.");
@@ -112,32 +126,32 @@ Game::Game() {
 }
 
 /**
- * @brief Initialize all auxiliary resources.
+ * @brief 初始化所有辅助资源。
  */
 void Game::game_init() {
     DataCenter* DC = DataCenter::get_instance();
     SoundCenter* SC = SoundCenter::get_instance();
     ImageCenter* IC = ImageCenter::get_instance();
     FontCenter* FC = FontCenter::get_instance();
-    // set window icon
+    // 设置窗口图标
     game_icon = IC->get(game_icon_img_path);
     al_set_display_icon(display, game_icon);
 
-    // register events to event_queue
+    // 注册事件到事件队列
     al_register_event_source(event_queue, al_get_display_event_source(display));
     al_register_event_source(event_queue, al_get_keyboard_event_source());
     al_register_event_source(event_queue, al_get_mouse_event_source());
     al_register_event_source(event_queue, al_get_timer_event_source(timer));
 
-    // init sound setting
+    // 初始化声音设置
     SC->init();
-    // init font setting
+    // 初始化字体设置
     FC->init();
     ui = new UI();
     ui->init();
     DC->level->init();
     DC->hero->init();
-    // game start
+    // 游戏开始
     background = IC->get(background_img_path);
     debug_log("Game state: change to START\n");
     state = STATE::START;
@@ -145,9 +159,9 @@ void Game::game_init() {
 }
 
 /**
- * @brief The function processes all data update.
- * @details The behavior of the whole game body is determined by its state.
- * @return Whether the game should keep running (true) or reaches the termination criteria (false).
+ * @brief 该函数处理所有数据更新。
+ * @details 整个游戏主体的行为由其状态决定。
+ * @return 游戏是否应该继续运行（true）或达到终止条件（false）。
  * @see Game::STATE
  */
 bool Game::game_update() {
@@ -206,35 +220,35 @@ bool Game::game_update() {
             return false;
         }
     }
-    // If the game is not paused, we should progress update.
+    // 如果游戏没有暂停，我们应该继续更新。
     if (state != STATE::PAUSE) {
         DC->player->update();
         SC->update();
         ui->update();
-        //DC->hero->update();
+        // DC->hero->update();
         if (state != STATE::START) {
-            DC->level->update();
+            // DC->level->update();
             OC->update();
         }
     }
-    // game_update is finished. The states of current frame will be previous states of the next frame.
+    // game_update 完成。当前帧的状态将成为下一帧的前一状态。
     memcpy(DC->prev_key_state, DC->key_state, sizeof(DC->key_state));
     memcpy(DC->prev_mouse_state, DC->mouse_state, sizeof(DC->mouse_state));
     return true;
 }
 
 /**
- * @brief Draw the whole game and objects.
+ * @brief 绘制整个游戏和对象。
  */
 void Game::game_draw() {
     DataCenter* DC = DataCenter::get_instance();
     OperationCenter* OC = OperationCenter::get_instance();
     FontCenter* FC = FontCenter::get_instance();
 
-    // Flush the screen first.
+    // 首先清空屏幕。
     al_clear_to_color(al_map_rgb(100, 100, 100));
     if (state != STATE::END) {
-        // background
+        // 背景
         al_draw_bitmap(background, 0, 0, 0);
         if (DC->game_field_length < DC->window_width)
             al_draw_filled_rectangle(
@@ -246,7 +260,7 @@ void Game::game_draw() {
                 0, DC->game_field_length,
                 DC->window_width, DC->window_height,
                 al_map_rgb(100, 100, 100));
-        // user interface
+        // 用户界面
         if (state != STATE::START) {
             DC->level->draw();
             ui->draw();
@@ -261,7 +275,7 @@ void Game::game_draw() {
             break;
         }
         case STATE::PAUSE: {
-            // game layout cover
+            // 游戏布局覆盖
             al_draw_filled_rectangle(0, 0, DC->window_width, DC->window_height, al_map_rgba(50, 50, 50, 64));
             al_draw_text(
                 FC->caviar_dreams[FontSize::LARGE], al_map_rgb(255, 255, 255),

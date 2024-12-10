@@ -1,6 +1,7 @@
 #include "Monster.h"
 #include <allegro5/allegro_primitives.h>
 #include "../Level.h"
+#include "../Player.h"
 #include "../Utils.h"
 #include "../data/DataCenter.h"
 #include "../data/ImageCenter.h"
@@ -85,15 +86,36 @@ Monster::Monster(const vector<Point>& path, MonsterType type) {
         const Point& grid = this->path.front();
         const Rectangle& region = DC->level->grid_to_region(grid);
         // 暫時將邊界框設置為中心（無區域），因為我們還沒有獲取怪物的碰撞箱。
-        //shape.reset(new Rectangle{region.center_x(), region.center_y(), region.center_x(), region.center_y()});
-        shape.reset(new Rectangle(DC->window_width - 50,
-                              DC->window_height / 2,
-                              DC->window_width,
-                              DC->window_height / 2 + 50));
+        // shape.reset(new Rectangle{region.center_x(), region.center_y(), region.center_x(), region.center_y()});
+        shape.reset(new Rectangle(DC->game_field_length - 50,  // 使用 game_field_length 而不是 window_width
+                                  DC->window_height / 2,
+                                  DC->game_field_length,  // 使用 game_field_length 而不是 window_width
+                                  DC->window_height / 2 + 50));
         this->path.pop();
     }
 }
 
+/**
+ * @brief 更新怪物狀態
+ *
+ * 如果怪物已經死亡，則直接返回。
+ *
+ * 1. 更新動畫幀：
+ *    - 如果 bitmap_switch_counter 不為零，則遞減它。
+ *    - 否則，更新 bitmap_img_id 並重置 bitmap_switch_counter。
+ *
+ * 2. 設置方向為始終向左。
+ *
+ * 3. 以相同速度向左移動：
+ *    - 根據 DataCenter 的 FPS 計算移動距離。
+ *    - 更新形狀的中心 x 坐標。
+ *
+ * 4. 更新碰撞箱：
+ *    - 根據當前動畫幀生成圖像路徑。
+ *    - 從 ImageCenter 獲取對應的位圖。
+ *    - 根據位圖的寬高計算新的碰撞箱。
+ *    - 創建新的 Rectangle 對象並更新形狀。
+ */
 void Monster::update() {
     if (is_dead)
         return;
