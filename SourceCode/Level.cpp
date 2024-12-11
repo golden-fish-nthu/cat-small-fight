@@ -70,22 +70,22 @@ void Level::load_level(int lvl) {
 /**
  * @brief 更新怪物生成計數器並在需要時創建怪物。
  */
-// void Level::update() {
-//     if (monster_spawn_counter) {
-//         monster_spawn_counter--;
-//         return;
-//     }
-//     DataCenter* DC = DataCenter::get_instance();
+void Level::update() {
+    if (monster_spawn_counter) {
+        monster_spawn_counter--;
+        return;
+    }
+    DataCenter* DC = DataCenter::get_instance();
 
-//     for (size_t i = 0; i < num_of_monsters.size(); ++i) {
-//         if (num_of_monsters[i] == 0)
-//             continue;
-//         DC->monsters.emplace_back(Monster::create_monster(static_cast<MonsterType>(i), DC->level->get_road_path()));
-//         num_of_monsters[i]--;
-//         break;
-//     }
-//     monster_spawn_counter = LevelSetting::monster_spawn_rate;
-// }
+    for (size_t i = 0; i < num_of_monsters.size(); ++i) {
+        if (num_of_monsters[i] == 0)
+            continue;
+        DC->monsters.emplace_back(Monster::create_monster(static_cast<MonsterType>(i), DC->level->get_road_path(), false));
+        num_of_monsters[i]--;
+        break;
+    }
+    monster_spawn_counter = LevelSetting::monster_spawn_rate;
+}
 
 void Level::draw() {
     if (level == -1)

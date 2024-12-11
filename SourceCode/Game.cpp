@@ -53,7 +53,7 @@ void Game::execute() {
                     int monster_cost = 100;  // 假設每個怪物的成本是 100 金幣
                     if (DC->player->coin >= monster_cost) {
                         DC->player->coin -= monster_cost;
-                        DC->monsters.emplace_back(Monster::create_monster(static_cast<MonsterType>(monster_type), DC->level->get_road_path()));
+                        DC->monsters.emplace_back(Monster::create_monster(static_cast<MonsterType>(monster_type), DC->level->get_road_path(), true));
                         debug_log("Generated monster type %d\n", monster_type);
                         debug_log("Player's coin: %d\n", DC->player->coin);
                     } else {
@@ -150,7 +150,6 @@ void Game::game_init() {
     ui = new UI();
     ui->init();
     DC->level->init();
-    DC->hero->init();
     // 游戏开始
     background = IC->get(background_img_path);
     debug_log("Game state: change to START\n");
@@ -225,9 +224,8 @@ bool Game::game_update() {
         DC->player->update();
         SC->update();
         ui->update();
-        // DC->hero->update();
         if (state != STATE::START) {
-            // DC->level->update();
+            DC->level->update();
             OC->update();
         }
     }
@@ -265,7 +263,6 @@ void Game::game_draw() {
             DC->level->draw();
             ui->draw();
             OC->draw();
-            DC->hero->draw();
         }
     }
     switch (state) {

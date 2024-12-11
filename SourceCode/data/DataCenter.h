@@ -14,7 +14,6 @@ class Tower;
 class Bullet;
 
 // class animal;
-class Hero;
 /**
  * @brief Stores generic global data and relatively small data structures.
  * @details The globally used data such as FPS (frames per second), windows size, game region, and states of input devices (mouse and keyboard).
@@ -97,7 +96,6 @@ class DataCenter {
     std::vector<Bullet*> towerBullets;
 
     // std::vector<animal*> animals;
-    Hero* hero;
 
    private:
     DataCenter();

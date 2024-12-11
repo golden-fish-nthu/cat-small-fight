@@ -17,7 +17,6 @@ void OperationCenter::update() {
     _update_monster_towerBullet();
     // 如果任何怪物到達終點，傷害玩家並刪除怪物。
     _update_monster_player();
-    _update_monster_hero();
 
     _update_monster_collision();
 }
@@ -84,16 +83,6 @@ void OperationCenter::_update_monster_player() {
             player->HP--;
             --i;
         }
-    }
-}
-
-void OperationCenter::_update_monster_hero() {
-    DataCenter* DC = DataCenter ::get_instance();
-
-    std::vector<Monster*>& monsters = DC->monsters;
-    for (size_t i = 0; i < monsters.size(); ++i) {
-        if (monsters[i]->shape->overlap(*(DC->hero->shape)))
-            monsters[i]->HP = 0;
     }
 }
 

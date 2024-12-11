@@ -27,7 +27,6 @@ DataCenter::DataCenter() {
     memset(prev_mouse_state, false, sizeof(prev_mouse_state));
     player = new Player();
     level = new Level();
-    hero = new Hero();
 }
 
 DataCenter::~DataCenter() {
