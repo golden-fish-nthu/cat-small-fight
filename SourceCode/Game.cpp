@@ -50,7 +50,8 @@ void Game::execute() {
                 // 處理數字鍵
                 if (event.keyboard.keycode >= ALLEGRO_KEY_1 && event.keyboard.keycode <= ALLEGRO_KEY_4) {
                     int monster_type = event.keyboard.keycode - ALLEGRO_KEY_1;
-                    int monster_cost = 100;  // 假設每個怪物的成本是 100 金幣
+                    int monster_cost = 50;  // 假設每個怪物的成本是 50 金幣
+                    printf("monster_cost: %d\n", monster_cost);
                     if (DC->player->coin >= monster_cost) {
                         DC->player->coin -= monster_cost;
                         DC->monsters.emplace_back(Monster::create_monster(static_cast<MonsterType>(monster_type), DC->level->get_road_path(), true));
