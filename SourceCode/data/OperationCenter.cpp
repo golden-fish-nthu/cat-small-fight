@@ -17,7 +17,6 @@ void OperationCenter::update() {
     _update_monster_towerBullet();
     // 如果任何怪物到達終點，傷害玩家並刪除怪物。
     _update_monster_player();
-    _update_monster_hero();
 
     _update_monster_collision();
 }
@@ -71,6 +70,7 @@ void OperationCenter::_update_monster_player() {
     for (size_t i = 0; i < monsters.size(); ++i) {
         // 檢查怪物是否被殺死。
         if (monsters[i]->HP <= 0) {
+            monsters[i]->is_dead = true;
             // 怪物被殺死。玩家獲得金錢。
             player->coin += monsters[i]->get_money();
             monsters.erase(monsters.begin() + i);
@@ -84,16 +84,6 @@ void OperationCenter::_update_monster_player() {
             player->HP--;
             --i;
         }
-    }
-}
-
-void OperationCenter::_update_monster_hero() {
-    DataCenter* DC = DataCenter ::get_instance();
-
-    std::vector<Monster*>& monsters = DC->monsters;
-    for (size_t i = 0; i < monsters.size(); ++i) {
-        if (monsters[i]->shape->overlap(*(DC->hero->shape)))
-            monsters[i]->HP = 0;
     }
 }
 
@@ -125,14 +115,15 @@ void OperationCenter::_update_monster_collision() {
     std::vector<Monster*>& monsters = DataCenter::get_instance()->monsters;
     for (size_t i = 0; i < monsters.size(); ++i) {
         for (size_t j = i + 1; j < monsters.size(); ++j) {
-            if (monsters[i]->shape->overlap(*(monsters[j]->shape))) {
-                // 標記碰撞的怪物為死亡
-                monsters[i]->is_dead = true;
-                monsters[j]->is_dead = true;
+            if (monsters[i]->shape->overlap(*(monsters[j]->shape))&& monsters[i]->way != monsters[j]->way) {
+                // 相減對方的HP
+                int damage1 = monsters[i]->HP;
+                int damage2 = monsters[j]->HP;
+                monsters[i]->HP -= damage2;
+                monsters[j]->HP -= damage1;
             }
         }
     }
-
     // 移除死亡的怪物
     monsters.erase(std::remove_if(monsters.begin(), monsters.end(),
                                   [](Monster* monster) { return monster->is_dead; }),

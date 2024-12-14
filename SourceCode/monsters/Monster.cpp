@@ -38,26 +38,19 @@ static constexpr char dir_path_prefix[][10] = {
 
 }  // namespace MonsterSetting
 
-/**
- * @brief 根據怪物類型創建一個 Monster* 實例。
- * @param type 怪物的類型。
- * @param path 怪物的行走路徑。路徑應該以道路網格格式表示。
- * @return 對應的 Monster* 實例。
- * @see Level::grid_to_region(const Point &grid) const
- */
-Monster* Monster::create_monster(MonsterType type, const vector<Point>& path) {
+Monster* Monster::create_monster(MonsterType type, const std::vector<Point>& path, bool way) {
     switch (type) {
         case MonsterType::WOLF: {
-            return new MonsterWolf{path};
+            return new MonsterWolf{path, way};
         }
         case MonsterType::CAVEMAN: {
-            return new MonsterCaveMan{path};
+            return new MonsterCaveMan{path, way};
         }
         case MonsterType::WOLFKNIGHT: {
-            return new MonsterWolfKnight{path};
+            return new MonsterWolfKnight{path, way};
         }
         case MonsterType::DEMONNIJIA: {
-            return new MonsterDemonNinja{path};
+            return new MonsterDemonNinja{path, way};
         }
         case MonsterType::MONSTERTYPE_MAX: {
         }
@@ -80,12 +73,12 @@ Dir convert_dir(const Point& v) {
     return Dir::RIGHT;
 }
 
-Monster::Monster(const vector<Point>& path, MonsterType type) {
+Monster::Monster(const vector<Point>& path, MonsterType type, bool way) {
     DataCenter* DC = DataCenter::get_instance();
     shape.reset(new Rectangle{0, 0, 0, 0});
     this->type = type;
-    dir = Dir::LEFT;
     bitmap_img_id = 0;
+    this->way = way;
     bitmap_switch_counter = 0;
     for (const Point& p : path)
         this->path.push(p);
@@ -94,35 +87,18 @@ Monster::Monster(const vector<Point>& path, MonsterType type) {
         const Rectangle& region = DC->level->grid_to_region(grid);
         // 暫時將邊界框設置為中心（無區域），因為我們還沒有獲取怪物的碰撞箱。
         // shape.reset(new Rectangle{region.center_x(), region.center_y(), region.center_x(), region.center_y()});
-        shape.reset(new Rectangle(DC->game_field_length - 50,  // 使用 game_field_length 而不是 window_width
-                                  DC->window_height / 2,
-                                  DC->game_field_length,  // 使用 game_field_length 而不是 window_width
-                                  DC->window_height / 2 + 50));
+        if (way == 1) {
+            shape.reset(new Rectangle(DC->game_field_length - 50, DC->window_height / 2, DC->game_field_length, DC->window_height / 2 + 50));
+            dir = Dir::LEFT;
+        } else {
+            shape.reset(new Rectangle(0, DC->window_height / 2, 50, DC->window_height / 2 + 50));
+            dir = Dir::RIGHT;
+        }
+
         this->path.pop();
     }
 }
 
-/**
- * @brief 更新怪物狀態
- *
- * 如果怪物已經死亡，則直接返回。
- *
- * 1. 更新動畫幀：
- *    - 如果 bitmap_switch_counter 不為零，則遞減它。
- *    - 否則，更新 bitmap_img_id 並重置 bitmap_switch_counter。
- *
- * 2. 設置方向為始終向左。
- *
- * 3. 以相同速度向左移動：
- *    - 根據 DataCenter 的 FPS 計算移動距離。
- *    - 更新形狀的中心 x 坐標。
- *
- * 4. 更新碰撞箱：
- *    - 根據當前動畫幀生成圖像路徑。
- *    - 從 ImageCenter 獲取對應的位圖。
- *    - 根據位圖的寬高計算新的碰撞箱。
- *    - 創建新的 Rectangle 對象並更新形狀。
- */
 void Monster::update() {
     if (is_dead)
         return;
@@ -136,13 +112,17 @@ void Monster::update() {
         bitmap_img_id = (bitmap_img_id + 1) % (bitmap_img_ids[static_cast<int>(dir)].size());
         bitmap_switch_counter = bitmap_switch_freq;
     }
-
-    // Set direction to always right
-    dir = Dir::LEFT;
+    double movement = v / DC->FPS;
+    // Set direction based on the way flag
+    if (way == 1) {
+        shape->update_center_x(shape->center_x() - movement);
+        dir = Dir::LEFT;
+    } else {
+        shape->update_center_x(shape->center_x() + movement);
+        dir = Dir::RIGHT;
+    }
 
     // Move right with the same speed
-    double movement = v / DC->FPS;
-    shape->update_center_x(shape->center_x() - movement);
 
     // Update collision box
     char buffer[50];

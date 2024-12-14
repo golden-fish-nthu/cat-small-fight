@@ -6,8 +6,8 @@
 // fixed settings: MonsterCaveMan attributes
 class MonsterCaveMan : public Monster {
    public:
-    MonsterCaveMan(const std::vector<Point>& path)
-        : Monster{path, MonsterType::CAVEMAN} {
+    MonsterCaveMan(const std::vector<Point>& path, bool way)
+        : Monster{path, MonsterType::CAVEMAN, way} {
         HP = 25;
         v = 100;
         money = 20;
