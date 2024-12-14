@@ -10,8 +10,11 @@
 class Bullet;
 
 // fixed settings
+// enum class TowerType {
+// 	ARCANE, ARCHER, CANON, POISON, STORM, TOWERTYPE_MAX
+// };
 enum class TowerType {
-	ARCANE, ARCHER, CANON, POISON, STORM, TOWERTYPE_MAX
+	ARCANE, ARCHER, CANON, POISON, TOWERTYPE_MAX
 };
 namespace TowerSetting {
 	const std::array<std::string, static_cast<int>(TowerType::TOWERTYPE_MAX)> tower_full_img_path = {
@@ -19,23 +22,29 @@ namespace TowerSetting {
 		"./assets/image/tower/Archer.png",
 		"./assets/image/tower/Canon.png",
 		"./assets/image/tower/Poison.png",
-		"./assets/image/tower/Storm.png"
+		// "./assets/image/tower/Storm.png"
 	};
 	const std::array<std::string, static_cast<int>(TowerType::TOWERTYPE_MAX)> tower_menu_img_path = {
-		"./assets/image/tower/Arcane_Menu.png",
-		"./assets/image/tower/Archer_Menu.png",
-		"./assets/image/tower/Canon_Menu.png",
-		"./assets/image/tower/Poison_Menu.png",
-		"./assets/image/tower/Storm_Menu.png"
+		"./assets/image/tower/Cat1_Menu.png",
+        "./assets/image/tower/Cat2_Menu.png",
+        "./assets/image/tower/Cat3_Menu.png",
+        "./assets/image/tower/Cat4_Menu.png",
+        // "./assets/image/tower/Storm_Menu.png"
+		// "./assets/image/tower/Arcane_Menu.png",
+		// "./assets/image/tower/Archer_Menu.png",
+		// "./assets/image/tower/Canon_Menu.png",
+		// "./assets/image/tower/Poison_Menu.png",
+		// "./assets/image/tower/Storm_Menu.png"
 	};
 	const std::array<std::string, static_cast<int>(TowerType::TOWERTYPE_MAX)> tower_bullet_img_path = {
 		"./assets/image/tower/Arcane_Beam.png",
 		"./assets/image/tower/Archer_Beam.png",
 		"./assets/image/tower/Canon_Beam.png",
 		"./assets/image/tower/Poison_Beam.png",
-		"./assets/image/tower/Storm_Beam.png"
+		// "./assets/image/tower/Storm_Beam.png"
 	};
-	const std::array<int, static_cast<int>(TowerType::TOWERTYPE_MAX)> tower_price = {50, 100, 150, 200, 250};
+	const std::array<int, static_cast<int>(TowerType::TOWERTYPE_MAX)> tower_price = {50, 100, 150, 200};
+	// const std::array<int, static_cast<int>(TowerType::TOWERTYPE_MAX)> tower_price = {50, 100, 150, 200, 250};
 };
 
 class Tower : public Object

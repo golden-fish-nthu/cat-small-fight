@@ -11,7 +11,7 @@
 #include "TowerArcher.h"
 #include "TowerCanon.h"
 #include "TowerPoison.h"
-#include "TowerStorm.h"
+// #include "TowerStorm.h"
 
 // fixed settings
 namespace TowerSetting {
@@ -39,9 +39,9 @@ Tower::create_tower(TowerType type, const Point& p) {
         case TowerType::POISON: {
             return new TowerPoison(p);
         }
-        case TowerType::STORM: {
-            return new TowerStorm(p);
-        }
+        // case TowerType::STORM: {
+        //     return new TowerStorm(p);
+        // }
         case TowerType::TOWERTYPE_MAX: {
         }
     }

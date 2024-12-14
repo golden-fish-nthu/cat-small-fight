@@ -29,6 +29,13 @@ static constexpr char monster_imgs_root_path[static_cast<int>(MonsterType::MONST
     "./assets/image/monster/DemonNinja"};
 static constexpr char dir_path_prefix[][10] = {
     "UP", "DOWN", "LEFT", "RIGHT"};
+// const std::array<std::string, static_cast<int>(MonsterType::MONSTERTYPE_MAX)> monster_menu_img_path = {
+// 		"./assets/image/tower/Arcane_Menu.png",
+// 		"./assets/image/tower/Archer_Menu.png",
+// 		"./assets/image/tower/Canon_Menu.png",
+// 		"./assets/image/tower/Poison_Menu.png",	};
+// const std::array<int, static_cast<int>(MonsterType::MONSTERTYPE_MAX)> monster_price = {50, 100, 150, 200};
+
 }  // namespace MonsterSetting
 
 /**
