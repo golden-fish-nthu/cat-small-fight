@@ -2,8 +2,9 @@
 #define GAME_H_INCLUDED
 
 #include <allegro5/allegro.h>
+#include <string>
+#include <unordered_set>
 #include "UI.h"
-
 /**
  * @brief Main class that runs the whole game.
  * @details All game procedures must be processed through this class.
@@ -12,9 +13,10 @@ class Game {
    public:
     void execute();
     int nlvl = 1;
-    double summon_cooldown;   // 冷卻時間
-    double last_summon_time;  // 上次召喚時間
-
+    double summon_cooldown;                 // 冷卻時間
+    double last_summon_time;                // 上次召喚時間
+    std::unordered_set<char> key_sequence;  // 用來跟踪按鍵序列
+    ALLEGRO_BITMAP* homo_background;        // 用來保存背景圖片
    public:
     Game();
     ~Game();
@@ -32,7 +34,8 @@ class Game {
         LEVEL,  // -> PAUSE, END
         PAUSE,  // -> LEVEL
         WIN,
-        LOSE
+        LOSE,
+        HOMO
     };
     STATE state;
     ALLEGRO_EVENT event;

@@ -162,6 +162,10 @@ void Game::game_init() {
     debug_log("Game state: change to START\n");
     state = STATE::START;
     al_start_timer(timer);
+    homo_background = al_load_bitmap("./assets/image/homo_background.jpg");  // 加載背景圖片
+    if (!homo_background) {
+        debug_log("Failed to load homo_background.jpg\n");
+    }
 }
 
 /**
@@ -176,6 +180,30 @@ bool Game::game_update() {
     OperationCenter* OC = OperationCenter::get_instance();
     SoundCenter* SC = SoundCenter::get_instance();
     static ALLEGRO_SAMPLE_INSTANCE* background = nullptr;
+    // 彩蛋
+    // 檢查按鍵序列
+    if (DC->key_state[ALLEGRO_KEY_H]) {
+        // printf("H\n");
+        key_sequence.insert('H');
+        for (auto k : key_sequence)
+            printf("%c", k);
+        putchar('\n');
+    }
+    if (DC->key_state[ALLEGRO_KEY_O]) {
+        // printf("O\n");
+        key_sequence.insert('O');
+        for (auto k : key_sequence)
+            printf("%c", k);
+        putchar('\n');
+    }
+
+    // 如果按鍵序列匹配 "HOMO"，則跳到 state HOMO
+    std::string sequence(key_sequence.begin(), key_sequence.end());
+    if (sequence == "OH") {
+        debug_log("<Game> state: change to HOMO\n");
+        state = STATE::HOMO;
+        key_sequence.clear();  // 清空按鍵序列
+    }
 
     switch (state) {
         static bool is_played = false;
@@ -248,6 +276,17 @@ bool Game::game_update() {
             }
             break;
         }
+        case STATE::HOMO: {
+            if (DC->key_state[ALLEGRO_KEY_Y] && !DC->prev_key_state[ALLEGRO_KEY_Y]) {
+                DC->player->HP = 114514;
+                DC->player->coin = 114514;
+                state = STATE::LEVEL;
+            }
+            if (DC->key_state[ALLEGRO_KEY_ESCAPE]) {
+                return false;
+            }
+            break;
+        }
     }
     // 如果游戏没有暂停，我们应该继续更新。
     if (state != STATE::PAUSE) {
@@ -312,6 +351,18 @@ void Game::game_draw() {
         case STATE::LOSE: {
             al_draw_text(FC->caviar_dreams[FontSize::LARGE], al_map_rgb(255, 255, 255), DC->window_width / 2.,
                          DC->window_height / 2., ALLEGRO_ALIGN_CENTRE, "YOU LOSE!");
+            break;
+        }
+        case STATE::HOMO: {
+            // 繪製背景圖片
+            if (homo_background) {
+                al_draw_bitmap(homo_background, 0, 0, 0);
+            } else {
+                debug_log("homo_background is not loaded\n");
+            }
+            // 繪製文字
+            al_draw_text(FC->caviar_dreams[FontSize::LARGE], al_map_rgb(255, 255, 255), DC->window_width / 2.,
+                         DC->window_height / 2., ALLEGRO_ALIGN_CENTRE, "YOU ARE GAY!");
             break;
         }
     }
