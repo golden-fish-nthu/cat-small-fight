@@ -11,9 +11,9 @@ class MonsterWolfKnight : public Monster {
    public:
     MonsterWolfKnight(const std::vector<Point>& path, bool way)
         : Monster{path, MonsterType::WOLFKNIGHT, way} {
-        HP = 15;
-        v = 80;
-        money = 30;
+        HP = 40;
+        v = 130;
+        money = 80;
         bitmap_img_ids.emplace_back(std::vector<int>({0, 1, 2, 3}));  // UP
         bitmap_img_ids.emplace_back(std::vector<int>({0, 1, 2, 3}));  // DOWN
         bitmap_img_ids.emplace_back(std::vector<int>({0, 1, 2, 3}));  // LEFT

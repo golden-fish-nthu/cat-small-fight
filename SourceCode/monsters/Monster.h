@@ -27,6 +27,7 @@ class Monster : public Object {
     void update();
     void draw();
     const int& get_money() const { return money; }
+    int get_position() const;
     int HP;
     bool is_dead = false;
     const std::queue<Point>& get_path() const { return path; }

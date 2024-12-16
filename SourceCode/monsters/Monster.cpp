@@ -122,8 +122,6 @@ void Monster::update() {
         dir = Dir::RIGHT;
     }
 
-    // Move right with the same speed
-
     // Update collision box
     char buffer[50];
     sprintf(
@@ -139,6 +137,14 @@ void Monster::update() {
     shape.reset(new Rectangle{
         (cx - w / 2.), (cy - h / 2.),
         (cx - w / 2. + w), (cy - h / 2. + h)});
+    if (shape->center_x() >= DC->window_width) {
+        if (way == 0 && !is_dead) {
+            DC->player->HP -= HP;  // 先減少玩家的 HP
+            HP = 0;
+            printf("Player HP: %d\n", DC->player->HP);
+            is_dead = true;  // 然後標記怪物為死亡
+        }
+    }
 }
 
 void Monster::draw() {
@@ -156,4 +162,8 @@ void Monster::draw() {
         bitmap,
         shape->center_x() - al_get_bitmap_width(bitmap) / 2,
         shape->center_y() - al_get_bitmap_height(bitmap) / 2, 0);
+}
+
+int Monster::get_position() const {
+    return shape->center_x();
 }

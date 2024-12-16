@@ -10,7 +10,7 @@ class MonsterCaveMan : public Monster {
         : Monster{path, MonsterType::CAVEMAN, way} {
         HP = 25;
         v = 100;
-        money = 20;
+        money = 70;
         bitmap_img_ids.emplace_back(std::vector<int>({0, 1, 2, 3}));  // UP
         bitmap_img_ids.emplace_back(std::vector<int>({0, 1, 2, 3}));  // DOWN
         bitmap_img_ids.emplace_back(std::vector<int>({0, 1, 2, 3}));  // LEFT

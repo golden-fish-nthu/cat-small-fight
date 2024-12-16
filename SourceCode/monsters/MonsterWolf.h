@@ -10,7 +10,7 @@ class MonsterWolf : public Monster {
         : Monster{path, MonsterType::WOLF, way} {
         HP = 10;
         v = 60;
-        money = 10;
+        money = 40;
         bitmap_img_ids.emplace_back(std::vector<int>({0, 1, 2, 3}));     // UP
         bitmap_img_ids.emplace_back(std::vector<int>({0, 1, 2, 3}));     // DOWN
         bitmap_img_ids.emplace_back(std::vector<int>({0, 1, 2, 3, 4}));  // LEFT

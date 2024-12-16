@@ -81,7 +81,6 @@ void OperationCenter::_update_monster_player() {
         // 檢查怪物是否到達終點。
         if (monsters[i]->get_path().empty()) {
             monsters.erase(monsters.begin() + i);
-            player->HP--;
             --i;
         }
     }
@@ -115,7 +114,7 @@ void OperationCenter::_update_monster_collision() {
     std::vector<Monster*>& monsters = DataCenter::get_instance()->monsters;
     for (size_t i = 0; i < monsters.size(); ++i) {
         for (size_t j = i + 1; j < monsters.size(); ++j) {
-            if (monsters[i]->shape->overlap(*(monsters[j]->shape))&& monsters[i]->way != monsters[j]->way) {
+            if (monsters[i]->shape->overlap(*(monsters[j]->shape)) && monsters[i]->way != monsters[j]->way) {
                 // 相減對方的HP
                 int damage1 = monsters[i]->HP;
                 int damage2 = monsters[j]->HP;

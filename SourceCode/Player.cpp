@@ -4,8 +4,8 @@
 namespace PlayerSetting {
 constexpr int init_HP = 3;        // 初始生命值
 constexpr int init_coin = 100;    // 初始金币
-constexpr int coin_freq = 10;     // 金币频率
-constexpr int coin_increase = 5;  // 金币增加量
+constexpr int coin_freq = 5;      // 金币频率
+constexpr int coin_increase = 1;  // 金币增加量
 constexpr int boss_hp = 200;      // boss 生命值
 };  // namespace PlayerSetting
 

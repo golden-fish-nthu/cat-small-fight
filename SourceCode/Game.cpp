@@ -1,7 +1,4 @@
 #include "Game.h"
-#include "Level.h"
-#include "Player.h"
-#include "Utils.h"
 #include <allegro5/allegro_acodec.h>
 #include <allegro5/allegro_font.h>
 #include <allegro5/allegro_image.h>
@@ -9,6 +6,9 @@
 #include <allegro5/allegro_ttf.h>
 #include <cstring>
 #include <vector>
+#include "Level.h"
+#include "Player.h"
+#include "Utils.h"
 // #include "animal/animal.h"
 #include "data/DataCenter.h"
 #include "data/FontCenter.h"
@@ -29,61 +29,67 @@ constexpr char background_sound_path[] = "./assets/sound/BackgroundMusic.ogg";
  * 对于计时器事件，只有当当前是计时器时才会调用 game_update 和 game_draw 函数。
  */
 void Game::execute() {
-    DataCenter *DC = DataCenter::get_instance();
+    DataCenter* DC = DataCenter::get_instance();
     // 主游戏循环
     bool run = true;
     while (run) {
         // 在此处理所有事件
         al_wait_for_event(event_queue, &event);
         switch (event.type) {
-        case ALLEGRO_EVENT_TIMER: {
-            run &= game_update();
-            game_draw();
-            break;
-        }
-        case ALLEGRO_EVENT_DISPLAY_CLOSE: { // 停止游戏
-            run = false;
-            break;
-        }
-        case ALLEGRO_EVENT_KEY_DOWN: {
-            DC->key_state[event.keyboard.keycode] = true;
-            // 處理數字鍵
-            if (event.keyboard.keycode >= ALLEGRO_KEY_1 && event.keyboard.keycode <= ALLEGRO_KEY_4) {
-                int monster_type = event.keyboard.keycode - ALLEGRO_KEY_1;
-                int monster_cost = 50; // 假設每個怪物的成本是 50 金幣
-                printf("monster_cost: %d\n", monster_cost);
-                if (DC->player->coin >= monster_cost) {
-                    DC->player->coin -= monster_cost;
-                    DC->monsters.emplace_back(Monster::create_monster(static_cast<MonsterType>(monster_type),
-                                                                      DC->level->get_road_path(), true));
-                    debug_log("Generated monster type %d\n", monster_type);
-                    debug_log("Player's coin: %d\n", DC->player->coin);
-                } else {
-                    debug_log("Player's coin: %d\n", DC->player->coin);
-                    debug_log("Not enough money to generate monster type %d\n", monster_type);
-                }
+            case ALLEGRO_EVENT_TIMER: {
+                run &= game_update();
+                game_draw();
+                break;
             }
-            break;
-        }
-        case ALLEGRO_EVENT_KEY_UP: {
-            DC->key_state[event.keyboard.keycode] = false;
-            break;
-        }
-        case ALLEGRO_EVENT_MOUSE_AXES: {
-            DC->mouse.x = event.mouse.x;
-            DC->mouse.y = event.mouse.y;
-            break;
-        }
-        case ALLEGRO_EVENT_MOUSE_BUTTON_DOWN: {
-            DC->mouse_state[event.mouse.button] = true;
-            break;
-        }
-        case ALLEGRO_EVENT_MOUSE_BUTTON_UP: {
-            DC->mouse_state[event.mouse.button] = false;
-            break;
-        }
-        default:
-            break;
+            case ALLEGRO_EVENT_DISPLAY_CLOSE: {  // 停止游戏
+                run = false;
+                break;
+            }
+            case ALLEGRO_EVENT_KEY_DOWN: {
+                DC->key_state[event.keyboard.keycode] = true;
+                // 處理數字鍵
+                if (event.keyboard.keycode >= ALLEGRO_KEY_1 && event.keyboard.keycode <= ALLEGRO_KEY_4) {
+                    double current_time = al_get_time();                       // 獲取當前時間
+                    if (current_time - last_summon_time >= summon_cooldown) {  // 檢查冷卻時間是否已過
+                        int monster_type = event.keyboard.keycode - ALLEGRO_KEY_1;
+                        int monster_cost = 50 * (monster_type + 1);  // 每个怪物的成本是 50 金币乘上按的数字键
+                        printf("monster_cost: %d\n", monster_cost);
+                        if (DC->player->coin >= monster_cost) {
+                            DC->player->coin -= monster_cost;
+                            DC->monsters.emplace_back(Monster::create_monster(static_cast<MonsterType>(monster_type),
+                                                                              DC->level->get_road_path(), true));
+                            debug_log("Generated monster type %d\n", monster_type);
+                            debug_log("Player's coin: %d\n", DC->player->coin);
+                            last_summon_time = current_time;  // 更新上次召喚時間
+                        } else {
+                            debug_log("Player's coin: %d\n", DC->player->coin);
+                            debug_log("Not enough money to generate monster type %d\n", monster_type);
+                        }
+                    } else {
+                        debug_log("Summon on cooldown. Please wait.\n");
+                    }
+                }
+                break;
+            }
+            case ALLEGRO_EVENT_KEY_UP: {
+                DC->key_state[event.keyboard.keycode] = false;
+                break;
+            }
+            case ALLEGRO_EVENT_MOUSE_AXES: {
+                DC->mouse.x = event.mouse.x;
+                DC->mouse.y = event.mouse.y;
+                break;
+            }
+            case ALLEGRO_EVENT_MOUSE_BUTTON_DOWN: {
+                DC->mouse_state[event.mouse.button] = true;
+                break;
+            }
+            case ALLEGRO_EVENT_MOUSE_BUTTON_UP: {
+                DC->mouse_state[event.mouse.button] = false;
+                break;
+            }
+            default:
+                break;
         }
     }
 }
@@ -93,7 +99,7 @@ void Game::execute() {
  * @details 只创建一个计时器，因为游戏及其所有数据都应该同步处理。
  */
 Game::Game() {
-    DataCenter *DC = DataCenter::get_instance();
+    DataCenter* DC = DataCenter::get_instance();
     GAME_ASSERT(al_init(), "failed to initialize allegro.");
 
     // 初始化 Allegro 插件
@@ -125,13 +131,15 @@ Game::Game() {
  * @brief 初始化所有辅助资源。
  */
 void Game::game_init() {
-    DataCenter *DC = DataCenter::get_instance();
-    SoundCenter *SC = SoundCenter::get_instance();
-    ImageCenter *IC = ImageCenter::get_instance();
-    FontCenter *FC = FontCenter::get_instance();
+    DataCenter* DC = DataCenter::get_instance();
+    SoundCenter* SC = SoundCenter::get_instance();
+    ImageCenter* IC = ImageCenter::get_instance();
+    FontCenter* FC = FontCenter::get_instance();
     // 设置窗口图标
     game_icon = IC->get(game_icon_img_path);
     al_set_display_icon(display, game_icon);
+    summon_cooldown = 0.3;                // 設置冷卻時間為 0.3秒
+    last_summon_time = -summon_cooldown;  // 初始化為負冷卻時間，確保遊戲開始時可以立即召喚
 
     // 注册事件到事件队列
     al_register_event_source(event_queue, al_get_display_event_source(display));
@@ -146,6 +154,9 @@ void Game::game_init() {
     ui = new UI();
     ui->init();
     DC->level->init();
+    DC->player = new Player();
+    DC->player->HP = 100;
+    nlvl = 1;
     // 游戏开始
     background = IC->get(background_img_path);
     debug_log("Game state: change to START\n");
@@ -159,64 +170,84 @@ void Game::game_init() {
  * @return 游戏是否应该继续运行（true）或达到终止条件（false）。
  * @see Game::STATE
  */
+
 bool Game::game_update() {
-    DataCenter *DC = DataCenter::get_instance();
-    OperationCenter *OC = OperationCenter::get_instance();
-    SoundCenter *SC = SoundCenter::get_instance();
-    static ALLEGRO_SAMPLE_INSTANCE *background = nullptr;
+    DataCenter* DC = DataCenter::get_instance();
+    OperationCenter* OC = OperationCenter::get_instance();
+    SoundCenter* SC = SoundCenter::get_instance();
+    static ALLEGRO_SAMPLE_INSTANCE* background = nullptr;
 
     switch (state) {
-    case STATE::START: {
         static bool is_played = false;
-        static ALLEGRO_SAMPLE_INSTANCE *instance = nullptr;
-        if (!is_played) {
-            instance = SC->play(game_start_sound_path, ALLEGRO_PLAYMODE_ONCE);
-            DC->level->load_level(1);
-            is_played = true;
-        }
 
-        if (!SC->is_playing(instance)) {
-            debug_log("<Game> state: change to LEVEL\n");
-            state = STATE::LEVEL;
-        }
-        break;
-    }
-    case STATE::LEVEL: {
-        static bool BGM_played = false;
-        if (!BGM_played) {
-            background = SC->play(background_sound_path, ALLEGRO_PLAYMODE_LOOP);
-            BGM_played = true;
-        }
+        case STATE::START: {
+            static ALLEGRO_SAMPLE_INSTANCE* instance = nullptr;
+            if (!is_played) {
+                instance = SC->play(game_start_sound_path, ALLEGRO_PLAYMODE_ONCE);
 
-        if (DC->key_state[ALLEGRO_KEY_P] && !DC->prev_key_state[ALLEGRO_KEY_P]) {
-            SC->toggle_playing(background);
-            debug_log("<Game> state: change to PAUSE\n");
-            state = STATE::PAUSE;
+                DC->level->load_level(nlvl);
+                is_played = true;
+            }
+
+            if (!SC->is_playing(instance)) {
+                debug_log("<Game> state: change to LEVEL\n");
+                state = STATE::LEVEL;
+            }
+            break;
         }
-        if (DC->level->remain_monsters() == 0 || DC->player->boss_hp == 0) {
-            debug_log("<Game> state: change to END\n");
-            state = STATE::WIN;
+        case STATE::LEVEL: {
+            static bool BGM_played = false;
+            if (DC->key_state[ALLEGRO_KEY_L] && !DC->prev_key_state[ALLEGRO_KEY_L]) {
+                debug_log("<Game> state: change to WIN\n");
+                state = STATE::WIN;
+            }
+            if (!BGM_played) {
+                background = SC->play(background_sound_path, ALLEGRO_PLAYMODE_LOOP);
+                BGM_played = true;
+            }
+
+            if (DC->key_state[ALLEGRO_KEY_P] && !DC->prev_key_state[ALLEGRO_KEY_P]) {
+                SC->toggle_playing(background);
+                debug_log("<Game> state: change to PAUSE\n");
+                state = STATE::PAUSE;
+            }
+            if (DC->level->remain_monsters() == 0 || DC->player->boss_hp == 0) {
+                if (nlvl < 2) {
+                    nlvl++;
+                    debug_log("<Game> state: change to START\n");
+                    state = STATE::START;
+                    is_played = false;
+                } else {
+                    debug_log("<Game> state: change to END\n");
+                    state = STATE::WIN;
+                }
+            }
+            if (DC->player->HP <= 0) {
+                debug_log("<Game> state: change to END\n");
+                state = STATE::LOSE;
+            }
+            break;
         }
-        if (DC->player->HP == 0) {
-            debug_log("<Game> state: change to END\n");
-            state = STATE::LOSE;
+        case STATE::PAUSE: {
+            if (DC->key_state[ALLEGRO_KEY_P] && !DC->prev_key_state[ALLEGRO_KEY_P]) {
+                SC->toggle_playing(background);
+                debug_log("<Game> state: change to LEVEL\n");
+                state = STATE::LEVEL;
+            }
+            break;
         }
-        break;
-    }
-    case STATE::PAUSE: {
-        if (DC->key_state[ALLEGRO_KEY_P] && !DC->prev_key_state[ALLEGRO_KEY_P]) {
-            SC->toggle_playing(background);
-            debug_log("<Game> state: change to LEVEL\n");
-            state = STATE::LEVEL;
+        case STATE::WIN: {
+            if (DC->key_state[ALLEGRO_KEY_ESCAPE]) {
+                return false;
+            }
+            break;
         }
-        break;
-    }
-    case STATE::WIN: {
-        return false;
-    }
-    case STATE::LOSE: {
-        return false;
-    }
+        case STATE::LOSE: {
+            if (DC->key_state[ALLEGRO_KEY_ESCAPE]) {
+                return false;
+            }
+            break;
+        }
     }
     // 如果游戏没有暂停，我们应该继续更新。
     if (state != STATE::PAUSE) {
@@ -238,9 +269,9 @@ bool Game::game_update() {
  * @brief 绘制整个游戏和对象。
  */
 void Game::game_draw() {
-    DataCenter *DC = DataCenter::get_instance();
-    OperationCenter *OC = OperationCenter::get_instance();
-    FontCenter *FC = FontCenter::get_instance();
+    DataCenter* DC = DataCenter::get_instance();
+    OperationCenter* OC = OperationCenter::get_instance();
+    FontCenter* FC = FontCenter::get_instance();
 
     // 首先清空屏幕。
     al_clear_to_color(al_map_rgb(100, 100, 100));
@@ -261,28 +292,28 @@ void Game::game_draw() {
         }
     }
     switch (state) {
-    case STATE::START: {
-    }
-    case STATE::LEVEL: {
-        break;
-    }
-    case STATE::PAUSE: {
-        // 游戏布局覆盖
-        al_draw_filled_rectangle(0, 0, DC->window_width, DC->window_height, al_map_rgba(50, 50, 50, 64));
-        al_draw_text(FC->caviar_dreams[FontSize::LARGE], al_map_rgb(255, 255, 255), DC->window_width / 2.,
-                     DC->window_height / 2., ALLEGRO_ALIGN_CENTRE, "GAME PAUSED");
-        break;
-    }
-    case STATE::WIN: {
-        al_draw_text(FC->caviar_dreams[FontSize::LARGE], al_map_rgb(255, 255, 255), DC->window_width / 2.,
-                     DC->window_height / 2., ALLEGRO_ALIGN_CENTRE, "YOU WIN!");
-        break;
-    }
-    case STATE::LOSE: {
-        al_draw_text(FC->caviar_dreams[FontSize::LARGE], al_map_rgb(255, 255, 255), DC->window_width / 2.,
-                     DC->window_height / 2., ALLEGRO_ALIGN_CENTRE, "YOU LOSE!");
-        break;
-    }
+        case STATE::START: {
+        }
+        case STATE::LEVEL: {
+            break;
+        }
+        case STATE::PAUSE: {
+            // 游戏布局覆盖
+            al_draw_filled_rectangle(0, 0, DC->window_width, DC->window_height, al_map_rgba(50, 50, 50, 64));
+            al_draw_text(FC->caviar_dreams[FontSize::LARGE], al_map_rgb(255, 255, 255), DC->window_width / 2.,
+                         DC->window_height / 2., ALLEGRO_ALIGN_CENTRE, "GAME PAUSED");
+            break;
+        }
+        case STATE::WIN: {
+            al_draw_text(FC->caviar_dreams[FontSize::LARGE], al_map_rgb(255, 255, 255), DC->window_width / 2.,
+                         DC->window_height / 2., ALLEGRO_ALIGN_CENTRE, "YOU WIN!");
+            break;
+        }
+        case STATE::LOSE: {
+            al_draw_text(FC->caviar_dreams[FontSize::LARGE], al_map_rgb(255, 255, 255), DC->window_width / 2.,
+                         DC->window_height / 2., ALLEGRO_ALIGN_CENTRE, "YOU LOSE!");
+            break;
+        }
     }
     al_flip_display();
 }
