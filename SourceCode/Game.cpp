@@ -22,7 +22,7 @@ constexpr char game_icon_img_path[] = "./assets/image/game_icon.png";
 constexpr char game_start_sound_path[] = "./assets/sound/growl.wav";
 constexpr char background_img_path[] = "./assets/image/StartBackground.jpg";
 constexpr char background_sound_path[] = "./assets/sound/BackgroundMusic.ogg";
-
+constexpr char lose_sound_path[] = "./assets/sound/lose.mp3";
 /**
  * @brief 游戏入口。
  * @details 该函数处理所有 Allegro 事件，并将事件状态更新到通用数据存储（即 DataCenter）。
@@ -310,9 +310,10 @@ bool Game::game_update() {
                 DC->player->coin = 114514;
                 state = STATE::LEVEL;
             }
-            if (DC->key_state[ALLEGRO_KEY_ESCAPE]) {
+            if (DC->key_state[ALLEGRO_KEY_N] && !DC->prev_key_state[ALLEGRO_KEY_N]) {
                 return false;
             }
+
             break;
         }
     }
@@ -387,6 +388,7 @@ void Game::game_draw() {
             } else {
                 debug_log("lose_background is not loaded\n");
             }
+            SoundCenter::get_instance()->play(lose_sound_path, ALLEGRO_PLAYMODE_ONCE);
             al_draw_text(FC->caviar_dreams[FontSize::LARGE], al_map_rgb(255, 255, 255), DC->window_width / 2.,
                          DC->window_height / 2., ALLEGRO_ALIGN_CENTRE, "YOU LOSE!");
             break;
@@ -402,7 +404,7 @@ void Game::game_draw() {
             al_draw_text(FC->caviar_dreams[FontSize::LARGE], al_map_rgb(255, 255, 255), DC->window_width / 2.,
                          DC->window_height / 2., ALLEGRO_ALIGN_CENTRE, "ARE YOU HOMO?");
             al_draw_text(FC->caviar_dreams[FontSize::LARGE], al_map_rgb(255, 255, 255), DC->window_width / 2.,
-                         DC->window_height / 4., ALLEGRO_ALIGN_CENTRE, "Y          N");
+                         (DC->window_height / 4.) * 3, ALLEGRO_ALIGN_CENTRE, "Y          N");
             break;
         }
     }
