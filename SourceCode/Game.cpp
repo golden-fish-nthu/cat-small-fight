@@ -196,10 +196,30 @@ bool Game::game_update() {
             printf("%c", k);
         putchar('\n');
     }
-
-    // 如果按鍵序列匹配 "HOMO"，則跳到 state HOMO
+    if (DC->key_state[ALLEGRO_KEY_G]) {
+        // printf("O\n");
+        key_sequence.insert('G');
+        for (auto k : key_sequence)
+            printf("%c", k);
+        putchar('\n');
+    }
+    if (DC->key_state[ALLEGRO_KEY_A]) {
+        // printf("O\n");
+        key_sequence.insert('A');
+        for (auto k : key_sequence)
+            printf("%c", k);
+        putchar('\n');
+    }
+    if (DC->key_state[ALLEGRO_KEY_Y]) {
+        // printf("O\n");
+        key_sequence.insert('Y');
+        for (auto k : key_sequence)
+            printf("%c", k);
+        putchar('\n');
+    }
+    // 如果按鍵序列匹配 "OH"or"YAG"，則跳到 state HOMO
     std::string sequence(key_sequence.begin(), key_sequence.end());
-    if (sequence == "OH") {
+    if (sequence == "OH" || sequence == "YAG") {
         debug_log("<Game> state: change to HOMO\n");
         state = STATE::HOMO;
         key_sequence.clear();  // 清空按鍵序列
