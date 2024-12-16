@@ -17,6 +17,8 @@ class Game {
     double last_summon_time;                // 上次召喚時間
     std::unordered_set<char> key_sequence;  // 用來跟踪按鍵序列
     ALLEGRO_BITMAP* homo_background;        // 用來保存背景圖片
+    ALLEGRO_BITMAP* win_background;         // 用來保存背景圖片
+    ALLEGRO_BITMAP* lose_background;        // 用來保存背景圖片
    public:
     Game();
     ~Game();

@@ -166,6 +166,14 @@ void Game::game_init() {
     if (!homo_background) {
         debug_log("Failed to load homo_background.jpg\n");
     }
+    win_background = al_load_bitmap("./assets/image/win_background.jpg");  // 加載背景圖片
+    if (!win_background) {
+        debug_log("Failed to load win_background.jpg\n");
+    }
+    lose_background = al_load_bitmap("./assets/image/lose_background.jpg");  // 加載背景圖片
+    if (!lose_background) {
+        debug_log("Failed to load lose_background.jpg\n");
+    }
 }
 
 /**
@@ -219,7 +227,7 @@ bool Game::game_update() {
     }
     // 如果按鍵序列匹配 "OH"or"YAG"，則跳到 state HOMO
     std::string sequence(key_sequence.begin(), key_sequence.end());
-    if (sequence == "OH" || sequence == "YAG") {
+    if (sequence == "OH" || sequence == "YGA") {
         debug_log("<Game> state: change to HOMO\n");
         state = STATE::HOMO;
         key_sequence.clear();  // 清空按鍵序列
@@ -247,7 +255,7 @@ bool Game::game_update() {
             static bool BGM_played = false;
             if (DC->key_state[ALLEGRO_KEY_L] && !DC->prev_key_state[ALLEGRO_KEY_L]) {
                 debug_log("<Game> state: change to WIN\n");
-                state = STATE::WIN;
+                state = STATE::LOSE;
             }
             if (!BGM_played) {
                 background = SC->play(background_sound_path, ALLEGRO_PLAYMODE_LOOP);
@@ -364,11 +372,21 @@ void Game::game_draw() {
             break;
         }
         case STATE::WIN: {
+            if (win_background) {
+                al_draw_bitmap(win_background, 0, 0, 0);
+            } else {
+                debug_log("win_background is not loaded\n");
+            }
             al_draw_text(FC->caviar_dreams[FontSize::LARGE], al_map_rgb(255, 255, 255), DC->window_width / 2.,
                          DC->window_height / 2., ALLEGRO_ALIGN_CENTRE, "YOU WIN!");
             break;
         }
         case STATE::LOSE: {
+            if (lose_background) {
+                al_draw_bitmap(lose_background, 0, 0, 0);
+            } else {
+                debug_log("lose_background is not loaded\n");
+            }
             al_draw_text(FC->caviar_dreams[FontSize::LARGE], al_map_rgb(255, 255, 255), DC->window_width / 2.,
                          DC->window_height / 2., ALLEGRO_ALIGN_CENTRE, "YOU LOSE!");
             break;
@@ -382,7 +400,9 @@ void Game::game_draw() {
             }
             // 繪製文字
             al_draw_text(FC->caviar_dreams[FontSize::LARGE], al_map_rgb(255, 255, 255), DC->window_width / 2.,
-                         DC->window_height / 2., ALLEGRO_ALIGN_CENTRE, "YOU ARE GAY!");
+                         DC->window_height / 2., ALLEGRO_ALIGN_CENTRE, "ARE YOU HOMO?");
+            al_draw_text(FC->caviar_dreams[FontSize::LARGE], al_map_rgb(255, 255, 255), DC->window_width / 2.,
+                         DC->window_height / 4., ALLEGRO_ALIGN_CENTRE, "Y          N");
             break;
         }
     }
